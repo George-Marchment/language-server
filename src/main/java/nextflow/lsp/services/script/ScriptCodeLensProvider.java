@@ -24,6 +24,7 @@ import java.util.Map;
 import nextflow.lsp.ast.ScriptView;
 import nextflow.lsp.services.CodeLensProvider;
 import nextflow.lsp.services.script.dag.DataflowVisitor;
+import nextflow.lsp.services.script.dag.JsonRenderer;
 import nextflow.lsp.services.script.dag.MermaidRenderer;
 import nextflow.lsp.util.Logger;
 import nextflow.lsp.util.LanguageServerUtils;
@@ -114,6 +115,26 @@ public class ScriptCodeLensProvider implements CodeLensProvider {
                 return Map.of("result", result);
             })
             .orElse(null);
+    }
+
+    /**
+     * Get the structure of a script as JSON: the dataflow graph of each
+     * workflow, with workflow calls expanded into take and emit nodes,
+     * and the source code of each process and workflow. Clients follow
+     * the URIs of the call nodes to get the structure of the scripts
+     * that they include.
+     *
+     * @param documentUri
+     */
+    public Map<String,Object> previewDagJson(String documentUri) {
+        var uri = URI.create(documentUri);
+        if( !ast.hasAST(uri) || ast.hasErrors(uri) )
+            return Map.of("error", "DAG preview cannot be shown because the script has errors.");
+
+        var sourceUnit = ast.getSourceUnit(uri);
+        var visitor = new DataflowVisitor(sourceUnit, ast, true, true);
+        visitor.visit();
+        return Map.of("result", new JsonRenderer(sourceUnit, ast).render(uri, visitor));
     }
 
 }

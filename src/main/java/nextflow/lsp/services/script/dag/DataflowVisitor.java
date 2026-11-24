@@ -616,6 +616,14 @@ public class DataflowVisitor extends ScriptVisitorSupport {
     private Node addNode(String label, Node.Type type, ASTNode an, Set<Node> preds) {
         var uri = ast.getURI(an);
         var dn = current.addNode(label, type, uri, preds);
+        if( type == Node.Type.OPERATOR && an instanceof ProcessNode pn ) {
+            dn.kind = "process";
+            dn.definition = pn.getName();
+        }
+        else if( type == Node.Type.OPERATOR && an instanceof WorkflowNode wn ) {
+            dn.kind = "workflow";
+            dn.definition = wn.getName();
+        }
         currentPreds().add(dn);
         return dn;
     }

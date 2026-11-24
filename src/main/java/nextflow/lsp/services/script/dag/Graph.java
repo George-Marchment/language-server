@@ -124,6 +124,19 @@ class Node {
 
     public boolean verbose;
 
+    /**
+     * The kind of definition that a call node refers to ("process" or
+     * "workflow"), or null for other nodes.
+     */
+    public String kind;
+
+    /**
+     * The name of the definition that a call node refers to, which
+     * differs from the label when the definition is included with an
+     * alias.
+     */
+    public String definition;
+
     public Node(int id, String label, Type type, URI uri, Set<Node> preds) {
         this.id = id;
         this.label = label;

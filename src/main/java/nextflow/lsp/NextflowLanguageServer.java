@@ -145,6 +145,8 @@ public class NextflowLanguageServer implements LanguageServer, LanguageClientAwa
 
     private static final String PREVIEW_DAG = "nextflow.server.previewDag";
 
+    private static final String PREVIEW_DAG_JSON = "nextflow.server.previewDagJson";
+
     private static final String PREVIEW_WORKSPACE = "nextflow.server.previewWorkspace";
 
     private static Logger log = Logger.getInstance();
@@ -215,6 +217,7 @@ public class NextflowLanguageServer implements LanguageServer, LanguageClientAwa
         var commands = List.of(
             PREVIEW_CONFIG,
             PREVIEW_DAG,
+            PREVIEW_DAG_JSON,
             PREVIEW_WORKSPACE
         );
         var executeCommandOptions = new ExecuteCommandOptions(commands);
@@ -514,6 +517,13 @@ public class NextflowLanguageServer implements LanguageServer, LanguageClientAwa
                     .map(ast -> new ScriptCodeLensProvider(ast).previewDag(uri, name, configuration.dagDirection(), configuration.dagVerbose()))
                     .orElse(null);
             });
+        }
+        if( PREVIEW_DAG_JSON.equals(command) && arguments.size() == 1 ) {
+            var uri = ClientUris.canonical(JsonUtils.getString(arguments.get(0)));
+            return fileRequest(PREVIEW_DAG_JSON, uri, null, (ctx) ->
+                ctx.project().scripts()
+                    .map(ast -> new ScriptCodeLensProvider(ast).previewDagJson(uri))
+                    .orElse(null));
         }
         if( PREVIEW_CONFIG.equals(command) && arguments.size() == 4 ) {
             var uri = ClientUris.canonical(JsonUtils.getString(arguments.get(0)));
